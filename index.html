@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#00c8ff" />
+  <meta name="description" content="Generación de código con IA: PWA, APKs, React, HTML, Agentes IA" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CodeAI Hub" />
+
+  <title>Code~~AI~~ Hub v20</title>
+
+  <!-- Favicon desde icon.png -->
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <style>
+    /* ═══════════════════════════════════════════════
+       RESET & VARIABLES
+    ═══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0d1a;
+      --bg2: #111827;
+      --bg3: #1e2a3a;
+      --accent: #00c8ff;
+      --accent2: #7c3aed;
+      --text: #e2e8f0;
+      --text2: #94a3b8;
+      --border: #1e3a5f;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,200,255,.12);
+      --font: 'Segoe UI', system-ui, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f4f8; --bg2: #ffffff; --bg3: #e2e8f0;
+      --text: #1a202c; --text2: #4a5568; --border: #cbd5e0;
+    }
+
+    html, body {
+      height: 100%; font-family: var(--font);
+      background: var(--bg); color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SCROLLBAR
+    ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+    /* ═══════════════════════════════════════════════
+       HEADER
+    ═══════════════════════════════════════════════ */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,13,26,.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 20px;
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    }
+
+    .logo { font-size: 1.2rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+    .logo span { color: var(--text2); text-decoration: line-through; }
+
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* ═══════════════════════════════════════════════
+       BOTÓN INSTALAR PWA
+    ═══════════════════════════════════════════════ */
+    #installBtn {
+      display: none;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; border: none; border-radius: 8px;
+      padding: 8px 16px; font-size: .85rem; font-weight: 600;
+      cursor: pointer; gap: 6px; align-items: center;
+      box-shadow: 0 0 16px rgba(0,200,255,.4);
+      transition: transform .2s, box-shadow .2s;
+      animation: pulse 2s infinite;
+    }
+    #installBtn.visible { display: flex; }
+    #installBtn:hover { transform: scale(1.05); box-shadow: 0 0 24px rgba(0,200,255,.6); }
+
+    @keyframes pulse {
+      0%,100% { box-shadow: 0 0 16px rgba(0,200,255,.4); }
+      50%      { box-shadow: 0 0 28px rgba(0,200,255,.8); }
+    }
+
+    /* ═══════════════════════════════════════════════
+       LANG SELECTOR
+    ═══════════════════════════════════════════════ */
+    .lang-btns { display: flex; gap: 4px; }
+    .lang-btns button {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); border-radius: 6px; padding: 4px 8px;
+      cursor: pointer; font-size: .8rem; transition: all .2s;
+    }
+    .lang-btns button.active { background: var(--accent); color: #000; border-color: var(--accent); }
+
+    /* ═══════════════════════════════════════════════
+       NAV TABS
+    ═══════════════════════════════════════════════ */
+    nav {
+      display: flex; overflow-x: auto; gap: 4px;
+      padding: 8px 16px; background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      scrollbar-width: none;
+    }
+    nav::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      flex-shrink: 0; background: transparent;
+      border: 1px solid transparent; border-radius: 8px;
+      color: var(--text2); padding: 8px 14px; cursor: pointer;
+      font-size: .85rem; transition: all .2s; white-space: nowrap;
+    }
+    .tab-btn:hover { background: var(--bg3); color: var(--text); }
+    .tab-btn.active {
+      background: var(--bg3); color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* ═══════════════════════════════════════════════
+       MAIN / TABS
+    ═══════════════════════════════════════════════ */
+    main { max-width: 1100px; margin: 0 auto; padding: 20px 16px; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ═══════════════════════════════════════════════
+       CARDS
+    ═══════════════════════════════════════════════ */
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      margin-bottom: 16px; box-shadow: var(--shadow);
+    }
+    .card h2 { font-size: 1.1rem; color: var(--accent); margin-bottom: 14px; }
+
+    /* ═══════════════════════════════════════════════
+       INPUTS / TEXTAREA / SELECT
+    ═══════════════════════════════════════════════ */
+    input, textarea, select {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 10px 12px;
+      font-size: .9rem; font-family: var(--font);
+      transition: border-color .2s; outline: none;
+      margin-bottom: 10px;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* ═══════════════════════════════════════════════
+       BUTTONS
+    ═══════════════════════════════════════════════ */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text); border-radius: 8px; padding: 9px 16px;
+      font-size: .85rem; cursor: pointer; transition: all .2s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--accent); color: #000; border-color: var(--accent); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #0080ff);
+      color: #000; border-color: var(--accent); font-weight: 700;
+    }
+    .btn-primary:hover { filter: brightness(1.15); }
+    .btn-danger { border-color: var(--danger); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+    .btn-success { border-color: var(--success); color: var(--success); }
+    .btn-success:hover { background: var(--success); color: #fff; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+    /* ═══════════════════════════════════════════════
+       CODE OUTPUT
+    ═══════════════════════════════════════════════ */
+    .code-output {
+      background: #0d1117; border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px;
+      font-family: 'Fira Code', 'Cascadia Code', monospace;
+      font-size: .82rem; line-height: 1.6;
+      color: #c9d1d9; overflow-x: auto;
+      white-space: pre-wrap; min-height: 120px;
+      max-height: 400px; overflow-y: auto;
+    }
+
+    /* ═══════════════════════════════════════════════
+       POMODORO
+    ═══════════════════════════════════════════════ */
+    .pomodoro-display {
+      font-size: 3.5rem; font-weight: 700; color: var(--accent);
+      text-align: center; letter-spacing: 4px; margin: 12px 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .pomodoro-controls { display: flex; justify-content: center; gap: 12px; }
+
+    /* ═══════════════════════════════════════════════
+       STATS GRID
+    ═══════════════════════════════════════════════ */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr));
+      gap: 12px; margin-bottom: 16px;
+    }
+    .stat-card {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px; text-align: center;
+    }
+    .stat-card .val { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+    .stat-card .lbl { font-size: .75rem; color: var(--text2); margin-top: 4px; }
+
+    /* ═══════════════════════════════════════════════
+       TABLE
+    ═══════════════════════════════════════════════ */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    th { background: var(--bg3); color: var(--accent); padding: 10px 12px; text-align: left; }
+    td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text2); }
+    tr:hover td { background: var(--bg3); color: var(--text); }
+
+    /* ═══════════════════════════════════════════════
+       BADGE / STATUS
+    ═══════════════════════════════════════════════ */
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 99px;
+      font-size: .72rem; font-weight: 600;
+    }
+    .badge-ok  { background: rgba(16,185,129,.2); color: var(--success); }
+    .badge-err { background: rgba(239,68,68,.2);  color: var(--danger); }
+    .badge-warn{ background: rgba(245,158,11,.2); color: var(--warning); }
+
+    /* ═══════════════════════════════════════════════
+       OFFLINE BANNER
+    ═══════════════════════════════════════════════ */
+    #offlineBanner {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--warning); color: #000;
+      padding: 10px; text-align: center; font-weight: 600;
+      z-index: 999; font-size: .9rem;
+    }
+    #offlineBanner.show { display: block; }
+
+    /* ═══════════════════════════════════════════════
+       TOAST
+    ═══════════════════════════════════════════════ */
+    #toastContainer {
+      position: fixed; bottom: 20px; right: 20px;
+      display: flex; flex-direction: column; gap: 8px; z-index: 9999;
+    }
+    .toast {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 18px;
+      color: var(--text); font-size: .85rem;
+      box-shadow: var(--shadow); animation: slideIn .3s ease;
+      max-width: 280px;
+    }
+    .toast.ok   { border-color: var(--success); }
+    .toast.err  { border-color: var(--danger); }
+    .toast.warn { border-color: var(--warning); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+    /* ═══════════════════════════════════════════════
+       QUICK PROMPTS
+    ═══════════════════════════════════════════════ */
+    .quick-prompts { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .qp-btn {
+      background: var(--bg3); border: 1px solid var(--border);
+      color: var(--text2); border-radius: 6px; padding: 5px 12px;
+      font-size: .8rem; cursor: pointer; transition: all .2s;
+    }
+    .qp-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ═══════════════════════════════════════════════
+       SANDBOX EDITOR
+    ═══════════════════════════════════════════════ */
+    .editor-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media(max-width:700px) { .editor-wrap { grid-template-columns: 1fr; } }
+    .editor-area {
+      background: #0d1117; border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px;
+      font-family: monospace; font-size: .85rem;
+      color: #c9d1d9; resize: vertical; min-height: 300px;
+      width: 100%; outline: none;
+    }
+    iframe#preview {
+      width: 100%; min-height: 300px; border: 1px solid var(--border);
+      border-radius: 8px; background: #fff;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TOGGLE SWITCH
+    ═══════════════════════════════════════════════ */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .toggle { position: relative; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; inset: 0; background: var(--bg3);
+      border-radius: 24px; cursor: pointer; transition: .3s;
+      border: 1px solid var(--border);
+    }
+    .slider::before {
+      content: ''; position: absolute;
+      width: 18px; height: 18px; left: 3px; top: 2px;
+      background: var(--text2); border-radius: 50%; transition: .3s;
+    }
+    input:checked + .slider { background: var(--accent); }
+    input:checked + .slider::before { transform: translateX(20px); background: #000; }
+
+    /* ═══════════════════════════════════════════════
+       COLLAPSIBLE DOCS
+    ═══════════════════════════════════════════════ */
+    .collapsible { cursor: pointer; user-select: none; }
+    .collapsible::after { content: ' ▶'; font-size: .7rem; }
+    .collapsible.open::after { content: ' ▼'; }
+    .collapse-content { display: none; padding: 12px 0; color: var(--text2); line-height: 1.7; }
+    .collapse-content.open { display: block; }
+
+    /* ═══════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════ */
+    @media(max-width:600px) {
+      .logo { font-size: 1rem; }
+      .pomodoro-display { font-size: 2.5rem; }
+    }
+
+    /* ═══════════════════════════════════════════════
+       LOADING SPINNER
+    ═══════════════════════════════════════════════ */
+    .spinner {
+      display: inline-block; width: 16px; height: 16px;
+      border: 2px solid var(--border); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ═══════════════════════════════════════════════
+       FEATURE: CÓDIGO QR
+    ═══════════════════════════════════════════════ */
+    #qrOutput { text-align: center; margin-top: 12px; }
+    #qrOutput img { max-width: 200px; border-radius: 8px; }
+
+    /* ═══════════════════════════════════════════════
+       FEATURE: DIFF VIEWER
+    ═══════════════════════════════════════════════ */
+    .diff-add { background: rgba(16,185,129,.15); color: var(--success); }
+    .diff-del { background: rgba(239,68,68,.15);  color: var(--danger); }
+    .diff-line { padding: 2px 8px; font-family: monospace; font-size: .82rem; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════ -->
+<header>
+  <div class="logo">Code<span>~~AI~~</span> Hub <small style="color:var(--text2);font-size:.7rem">v20</small></div>
+
+  <div class="header-right">
+    <!-- Selector de modelo -->
+    <select id="modelSelect" style="width:auto;margin:0;padding:6px 10px;font-size:.8rem">
+      <option value="llama3-8b-8192">Llama3 8B (Groq)</option>
+      <option value="llama3-70b-8192">Llama3 70B (Groq)</option>
+      <option value="mixtral-8x7b-32768">Mixtral (Groq)</option>
+      <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+    </select>
+
+    <!-- Lang -->
+    <div class="lang-btns">
+      <button class="active" onclick="setLang('es')">🇪🇸</button>
+      <button onclick="setLang('en')">🇬🇧</button>
+      <button onclick="setLang('zh')">🇨🇳</button>
+    </div>
+
+    <!-- BOTÓN INSTALAR PWA -->
+    <button id="installBtn" onclick="installPWA()">📲 Instalar</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════
+     NAV TABS
+═══════════════════════════════════════════════ -->
+<nav id="mainNav">
+  <button class="tab-btn active" data-tab="generator">⚡ Generador</button>
+  <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
+  <button class="tab-btn" data-tab="sandbox">🧪 Sandbox</button>
+  <button class="tab-btn" data-tab="config">⚙️ Config</button>
+  <button class="tab-btn" data-tab="docs">📚 Docs</button>
+  <button class="tab-btn" data-tab="tools">🛠️ Herramientas</button>
+</nav>
+
+<!-- ═══════════════════════════════════════════════
+     MAIN
+═══════════════════════════════════════════════ -->
+<main>
+
+  <!-- ───────────────────────────────────────────
+       TAB: GENERADOR
+  ─────────────────────────────────────────────── -->
+  <section id="tab-generator" class="tab-panel active">
+
+    <!-- Pomodoro -->
+    <div class="card">
+      <h2>🍅 Pomodoro</h2>
+      <div class="pomodoro-display" id="pomDisplay">25:00</div>
+      <div class="pomodoro-controls">
+        <button class="btn" id="pomBtn" onclick="pomToggle()">▶ Iniciar</button>
+        <button class="btn" onclick="pomReset()">↺ Reset</button>
+        <select id="pomMode" style="width:auto;margin:0" onchange="pomReset()">
+          <option value="25">Pomodoro 25min</option>
+          <option value="5">Descanso 5min</option>
+          <option value="15">Descanso largo 15min</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Generador IA -->
+    <div class="card">
+      <h2>⚡ Generador de Código IA</h2>
+
+      <div class="quick-prompts">
+        <button class="qp-btn" onclick="setPrompt('PWA completa con service worker, manifest y offline')">PWA</button>
+        <button class="qp-btn" onclick="setPrompt('Componente React con hooks y TypeScript')">React</button>
+        <button class="qp-btn" onclick="setPrompt('Página HTML5 responsive con CSS moderno')">HTML</button>
+        <button class="qp-btn" onclick="setPrompt('Configuración para empaquetar APK con PWABuilder')">APK</button>
+        <button class="qp-btn" onclick="setPrompt('Agente IA con LangChain y memoria de conversación')">IA Agent</button>
+        <button class="qp-btn" onclick="setPrompt('API REST con Node.js, Express y autenticación JWT')">API REST</button>
+      </div>
+
+      <textarea id="promptInput" rows="4" placeholder="Describe lo que quieres generar..."></textarea>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateCode()">🤖 Generar con IA</button>
+        <button class="btn" onclick="fetchURL()">🌐 Obtener datos</button>
+        <input id="urlInput" type="url" placeholder="🔗 URL" style="flex:1;min-width:180px;margin:0" />
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <div class="card">
+      <h2>📄 Resultado</h2>
+      <div class="btn-row" style="margin-bottom:10px">
+        <button class="btn" onclick="copyCode()">📋 Copiar</button>
+        <button class="btn" onclick="saveSnippet()">💾 Guardar snippet</button>
+        <button class="btn" onclick="sendToSandbox()">🧪 Enviar a Sandbox</button>
+        <button class="btn" onclick="exportResult()">⬇️ Exportar .txt</button>
+      </div>
+      <div class="code-output" id="codeOutput">// El código generado aparecerá aquí...
+//
+// Configura tu API key en ⚙️ Config
+// y empieza a generar.</div>
+    </div>
+
+    <!-- Entrenamiento IA -->
+    <div class="card">
+      <h2>🧠 Entrenar IA con tus Datos</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">
+        Usa tus snippets para mejorar el contexto de la IA. Los datos se guardan en localStorage.
+      </p>
+      <div id="trainStatus" class="badge badge-warn">⚪ API IA no conectada</div>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="trainWithSnippets()">🧠 Entrenar con snippets</button>
+        <button class="btn" onclick="showTrainAPIModal()">🔌 Conectar API entrenamiento</button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ───────────────────────────────────────────
+       TAB: DASHBOARD
+  ─────────────────────────────────────────────── -->
+  <section id="tab-dashboard" class="tab-panel">
+    <div class="card">
+      <h2>📊 Dashboard</h2>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="val" id="statSnippets">0</div><div class="lbl">Snippets totales</div></div>
+        <div class="stat-card"><div class="val" id="statKB">0 KB</div><div class="lbl">Datos guardados</div></div>
+        <div class="stat-card"><div class="val" id="statToday">0</div><div class="lbl">Hoy generados</div></div>
+        <div class="stat-card"><div class="val" id="statModel">—</div><div class="lbl">Modelo usado</div></div>
+        <div class="stat-card"><div class="val" id="statPom">0</div><div class="lbl">Pomodoros hoy</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🗂️ Historial de Snippets</h2>
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn" onclick="exportSnippets()">⬇️ Exportar JSON</button>
+        <button class="btn" onclick="importSnippets()">⬆️ Importar</button>
+        <button class="btn btn-danger" onclick="clearAllSnippets()">🗑️ Limpiar todo</button>
+        <input type="text" id="searchSnippets" placeholder="🔍 Buscar..." style="flex:1;margin:0" oninput="renderHistory()" />
+      </div>
+      <div class="tbl-wrap">
+        <table id="historyTable">
+          <thead><tr><th>Prompt</th><th>Modelo</th><th>Tamaño</th><th>Fecha</th><th>Acciones</th></tr></thead>
+          <tbody id="historyBody"><tr><td colspan="5" style="text-align:center">Sin snippets aún.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────────
+       TAB: SANDBOX
+  ─────────────────────────────────────────────── -->
+  <section id="tab-sandbox" class="tab-panel">
+    <div class="card">
+      <h2>🧪 Sandbox Editor</h2>
+      <div class="btn-row" style="margin-bottom:12px">
+        <button class="btn" onclick="runSandbox()">▶ Ejecutar</button>
+        <button class="btn" onclick="copySandbox()">📋 Copiar</button>
+        <button class="btn" onclick="saveSandboxSnippet()">💾 Guardar</button>
+        <button class="btn btn-danger" onclick="clearSandbox()">🗑️ Limpiar</button>
+        <label class="btn" style="cursor:pointer">
+          📂 Subir archivo
+          <input type="file" accept=".html,.css,.js,.txt" style="display:none" onchange="loadFile(event)" />
+        </label>
+      </div>
+      <div class="editor-wrap">
+        <textarea class="editor-area" id="sandboxEditor" placeholder="// Escribe o pega tu código HTML/JS aquí..."></textarea>
+        <iframe id="preview" sandbox="allow-scripts allow-same-origin"></iframe>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────────
+       TAB: CONFIG
+  ─────────────────────────────────────────────── -->
+  <section id="tab-config" class="tab-panel">
+
+    <!-- API Keys -->
+    <div class="card">
+      <h2>🔑 Claves API</h2>
+      <label style="color:var(--text2);font-size:.85rem">Groq API Key (gratuita)</label>
+      <input type="password" id="groqKey" placeholder="gsk_..." />
+      <small style="color:var(--text2)">Gratis en <a href="https://console.groq.com" target="_blank" style="color:var(--accent)">console.groq.com</a></small>
+      <br><br>
+      <label style="color:var(--text2);font-size:.85rem">Gemini API Key (gratuita)</label>
+      <input type="password" id="geminiKey" placeholder="AIza..." />
+      <small style="color:var(--text2)">Gratis en <a href="https://aistudio.google.com" target="_blank" style="color:var(--accent)">aistudio.google.com</a></small>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-primary" onclick="saveKeys()">💾 Guardar claves</button>
+        <button class="btn" onclick="testAPIKeys()">🔍 Verificar claves</button>
+      </div>
+    </div>
+
+    <!-- Apariencia -->
+    <div class="card">
+      <h2>🎨 Apariencia</h2>
+      <div class="toggle-row">
+        <span>Modo oscuro</span>
+        <label class="toggle">
+          <input type="checkbox" id="darkToggle" checked onchange="toggleTheme()" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <label style="color:var(--text2);font-size:.85rem">Tema de color</label>
+      <select id="themeColor" onchange="applyThemeColor()" style="margin-bottom:12px">
+        <option value="#00c8ff">Cyan (default)</option>
+        <option value="#7c3aed">Púrpura</option>
+        <option value="#10b981">Verde</option>
+        <option value="#f59e0b">Ámbar</option>
+        <option value="#ef4444">Rojo</option>
+      </select>
+      <label style="color:var(--text2);font-size:.85rem">Idioma</label>
+      <div class="lang-btns">
+        <button onclick="setLang('es')">🇪🇸 ES</button>
+        <button onclick="setLang('en')">🇬🇧 EN</button>
+        <button onclick="setLang('zh')">🇨🇳 ZH</button>
+      </div>
+    </div>
+
+    <!-- Google Drive -->
+    <div class="card">
+      <h2>☁️ Google Drive</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">
+        Conecta tu Google Drive para sincronizar snippets.
+        <a href="https://console.cloud.google.com" target="_blank" style="color:var(--accent)">Obtener aquí →</a>
+      </p>
+      <input type="text" id="driveClientId" placeholder="Google Client ID" />
+      <input type="password" id="driveToken" placeholder="Access Token OAuth2" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveDriveConfig()">💾 Guardar</button>
+        <button class="btn" onclick="testDrive()">🔗 Probar conexión</button>
+        <button class="btn" onclick="syncDrive()">🔄 Sincronizar</button>
+      </div>
+      <div id="driveStatus" style="margin-top:8px;font-size:.8rem;color:var(--text2)">No conectado</div>
+    </div>
+
+    <!-- URLs IA -->
+    <div class="card">
+      <h2>🔗 URLs para alimentar la IA</h2>
+      <div id="urlList"></div>
+      <div class="btn-row">
+        <input type="url" id="newURL" placeholder="https://..." style="flex:1;margin:0" />
+        <button class="btn" onclick="addURL()">➕ Añadir</button>
+        <button class="btn btn-primary" onclick="loadURLsIntoAI()">🤖 Cargar en IA</button>
+      </div>
+    </div>
+
+    <!-- Exportar / Importar perfil -->
+    <div class="card">
+      <h2>📦 Exportar / Importar Perfil</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">
+        Incluye: snippets, claves (cifradas), URLs IA y ajustes.
+      </p>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="exportProfile()">⬇️ Exportar perfil</button>
+        <label class="btn" style="cursor:pointer">
+          ⬆️ Importar perfil
+          <input type="file" accept=".json" style="display:none" onchange="importProfile(event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Premium -->
+    <div class="card">
+      <h2>⭐ Activar Premium</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">
+        Desbloquea funciones avanzadas. Verificación local por SHA-256.
+      </p>
+      <input type="password" id="premiumPass" placeholder="Contraseña de activación" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="activatePremium()">🔓 Activar Premium</button>
+        <label class="btn" style="cursor:pointer">
+          📂 Importar clave .json
+          <input type="file" accept=".json" style="display:none" onchange="importPremiumKey(event)" />
+        </label>
+      </div>
+      <div id="premiumStatus" style="margin-top:8px;font-size:.85rem;color:var(--text2)"></div>
+    </div>
+
+  </section>
+
+  <!-- ───────────────────────────────────────────
+       TAB: DOCS
+  ─────────────────────────────────────────────── -->
+  <section id="tab-docs" class="tab-panel">
+    <div class="card">
+      <h2>📖 Manual de Uso</h2>
+      <div class="btn-row" style="margin-bottom:16px">
+        <button class="btn" onclick="expandAll()">⬆️ Expandir todo</button>
+        <button class="btn" onclick="collapseAll()">⬇️ Colapsar todo</button>
+      </div>
+
+      <div id="docsContent">
+        <h3 class="collapsible" onclick="toggleCollapse(this)">🚀 Inicio rápido</h3>
+        <div class="collapse-content">
+          <p>1. Ve a ⚙️ Config y añade tu Groq API Key (gratuita en console.groq.com).<br>
+          2. Vuelve a ⚡ Generador, escribe tu prompt y pulsa 🤖 Generar.<br>
+          3. Copia o guarda el resultado como snippet.<br>
+          4. Usa 🧪 Sandbox para probar el código en tiempo real.</p>
+        </div>
+
+        <h3 class="collapsible" onclick="toggleCollapse(this)">🤖 Modelos disponibles</h3>
+        <div class="collapse-content">
+          <p><strong>Groq (gratuito):</strong> Llama3 8B, Llama3 70B, Mixtral 8x7B — velocidad extrema.<br>
+          <strong>Gemini (gratuito):</strong> Gemini 2.0 Flash — multimodal, contexto largo.<br>
+          Selecciona el modelo en el desplegable del header.</p>
+        </div>
+
+        <h3 class="collapsible" onclick="toggleCollapse(this)">📲 Instalar como PWA</h3>
+        <div class="collapse-content">
+          <p>Pulsa el botón <strong>📲 Instalar</strong> del header cuando aparezca.<br>
+          En iOS: Safari → Compartir → Añadir a pantalla de inicio.<br>
+          En Android: Chrome → Menú → Instalar app.</p>
+        </div>
+
+        <h3 class="collapsible" onclick="toggleCollapse(this)">📦 Empaquetar APK con PWABuilder</h3>
+        <div class="collapse-content">
+          <p>1. Sube tu app a un servidor HTTPS (GitHub Pages, Netlify, Vercel).<br>
+          2. Ve a <a href="https://www.pwabuilder.com" target="_blank" style="color:var(--accent)">pwabuilder.com</a>.<br>
+          3. Introduce la URL de tu app y genera el APK.<br>
+          4. Descarga el .apk y distribúyelo o súbelo a Play Store.</p>
+        </div>
+
+        <h3 class="collapsible" onclick="toggleCollapse(this)">☁️ Google Drive</h3>
+        <div class="collapse-content">
+          <p>Necesitas un Client ID de Google Cloud Console y un Access Token OAuth2.<br>
+          El token caduca cada hora. Renuévalo en <a href="https://developers.google.com/oauthplayground" target="_blank" style="color:var(--accent)">OAuth Playground</a>.<br>
+          Scope necesario: <code style="color:var(--accent)">https://www.googleapis.com/auth/drive.file</code></p>
+        </div>
+
+        <h3 class="collapsible" onclick="toggleCollapse(this)">🧠 Entrenamiento IA</h3>
+        <div class="collapse-content">
+          <p>Compatible con Ollama, LM Studio, OpenLLM y cualquier API REST.<br>
+          Los datos de entrenamiento se guardan en localStorage y se pueden sincronizar con Drive.</p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h2>🚀 Recursos</h2>
+        <div class="btn-row">
+          <a href="https://console.groq.com" target="_blank" class="btn">🟣 Groq Console</a>
+          <a href="https://aistudio.google.com" target="_blank" class="btn">🔵 AI Studio</a>
+          <a href="https://developer.mozilla.org" target="_blank" class="btn">🟠 MDN Docs</a>
+          <a href="https://github.com" target="_blank" class="btn">⚫ GitHub</a>
+          <a href="https://www.pwabuilder.com" target="_blank" class="btn">🏗️ PWABuilder</a>
+          <a href="https://web.dev" target="_blank" class="btn">🟢 web.dev</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ───────────────────────────────────────────
+       TAB: HERRAMIENTAS (5 funciones nuevas)
+  ─────────────────────────────────────────────── -->
+  <section id="tab-tools" class="tab-panel">
+
+    <!-- FUNCIÓN 1: Generador de QR -->
+    <div class="card">
+      <h2>📱 Generador de Código QR</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Convierte cualquier URL o texto en un código QR descargable.</p>
+      <input type="text" id="qrInput" placeholder="https://tu-app.netlify.app" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateQR()">📱 Generar QR</button>
+        <button class="btn" onclick="downloadQR()">⬇️ Descargar QR</button>
+      </div>
+      <div id="qrOutput"></div>
+    </div>
+
+    <!-- FUNCIÓN 2: Conversor de Código -->
+    <div class="card">
+      <h2>🔄 Conversor de Código</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Convierte código entre lenguajes usando IA.</p>
+      <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin-bottom:10px">
+        <select id="convertFrom">
+          <option>JavaScript</option><option>Python</option>
+          <option>TypeScript</option><option>PHP</option><option>Java</option>
+        </select>
+        <span style="color:var(--accent);font-size:1.2rem">→</span>
+        <select id="convertTo">
+          <option>Python</option><option>JavaScript</option>
+          <option>TypeScript</option><option>PHP</option><option>Java</option>
+        </select>
+      </div>
+      <textarea id="convertInput" rows="5" placeholder="Pega aquí el código a convertir..."></textarea>
+      <button class="btn btn-primary" onclick="convertCode()">🔄 Convertir con IA</button>
+      <div class="code-output" id="convertOutput" style="margin-top:10px">// Resultado de la conversión...</div>
+    </div>
+
+    <!-- FUNCIÓN 3: Analizador / Revisor de Código -->
+    <div class="card">
+      <h2>🔍 Revisor de Código IA</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Analiza tu código y detecta bugs, mejoras de rendimiento y buenas prácticas.</p>
+      <textarea id="reviewInput" rows="6" placeholder="Pega el código a revisar..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="reviewCode()">🔍 Analizar código</button>
+        <button class="btn" onclick="fixCode()">🔧 Auto-corregir</button>
+      </div>
+      <div class="code-output" id="reviewOutput" style="margin-top:10px">// El análisis aparecerá aquí...</div>
+    </div>
+
+    <!-- FUNCIÓN 4: Generador de README -->
+    <div class="card">
+      <h2>📝 Generador de README.md</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Genera un README profesional para tu proyecto automáticamente.</p>
+      <input type="text" id="readmeName" placeholder="Nombre del proyecto" />
+      <input type="text" id="readmeDesc" placeholder="Descripción breve" />
+      <input type="text" id="readmeTech" placeholder="Tecnologías (React, Node.js, PWA...)" />
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="generateREADME()">📝 Generar README</button>
+        <button class="btn" onclick="copyREADME()">📋 Copiar</button>
+        <button class="btn" onclick="downloadREADME()">⬇️ Descargar .md</button>
+      </div>
+      <div class="code-output" id="readmeOutput" style="margin-top:10px">// El README aparecerá aquí...</div>
+    </div>
+
+    <!-- FUNCIÓN 5: Comparador de Código (Diff) -->
+    <div class="card">
+      <h2>🆚 Comparador de Código (Diff)</h2>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:12px">Compara dos versiones de código y visualiza las diferencias línea a línea.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <label style="color:var(--text2);font-size:.8rem">Versión A (original)</label>
+          <textarea id="diffA" rows="8" placeholder="Versión original..."></textarea>
+        </div>
+        <div>
+          <label style="color:var(--text2);font-size:.8rem">Versión B (nueva)</label>
+          <textarea id="diffB" rows="8" placeholder="Versión nueva..."></textarea>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:8px" onclick="runDiff()">🆚 Comparar</button>
+      <div id="diffOutput" style="margin-top:12px;border:1px solid var(--border);border-radius:8px;overflow:hidden"></div>
+    </div>
+
+  </section>
+
+</main><!-- /main -->
+
+<!-- ═══════════════════════════════════════════════
+     OFFLINE BANNER
+═══════════════════════════════════════════════ -->
+<div id="offlineBanner">📵 Sin conexión — modo offline activo</div>
+
+<!-- ═══════════════════════════════════════════════
+     TOAST CONTAINER
+═══════════════════════════════════════════════ -->
+<div id="toastContainer"></div>
+
+<!-- ═══════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════
+   ESTADO GLOBAL
+════════════════════════════════════════════════ */
+const STATE = {
+  snippets: JSON.parse(localStorage.getItem('cai_snippets') || '[]'),
+  urls: JSON.parse(localStorage.getItem('cai_urls') || '[]'),
+  groqKey: localStorage.getItem('cai_groq') || '',
+  geminiKey: localStorage.getItem('cai_gemini') || '',
+  lang: localStorage.getItem('cai_lang') || 'es',
+  theme: localStorage.getItem('cai_theme') || 'dark',
+  accentColor: localStorage.getItem('cai_accent') || '#00c8ff',
+  pomSeconds: 25 * 60,
+  pomRunning: false,
+  pomInterval: null,
+  pomDone: 0,
+  aiContext: '',
+  lastModel: '',
+  generatedToday: parseInt(localStorage.getItem('cai_today') || '0'),
+  todayDate: localStorage.getItem('cai_today_date') || ''
+};
+
+/* ════════════════════════════════════════════════
+   SERVICE WORKER
+════════════════════════════════════════════════ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(r => console.log('SW registrado:', r.scope))
+      .catch(e => console.warn('SW error:', e));
+  });
+}
+
+/* ════════════════════════════════════════════════
+   PWA INSTALL
+════════════════════════════════════════════════ */
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.getElementById('installBtn');
+  btn.classList.add('visible');
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBtn').classList.remove('visible');
+  toast('✅ App instalada correctamente', 'ok');
+  deferredPrompt = null;
+});
+
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') toast('✅ Instalando...', 'ok');
+      deferredPrompt = null;
+    });
+  } else {
+    toast('ℹ️ Usa el menú del navegador para instalar, o ya está instalada.', 'warn');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════ */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'dashboard') renderDashboard();
+  });
+});
+
+// Tab por URL param
+const urlParams = new URLSearchParams(location.search);
+if (urlParams.get('tab')) {
+  const t = document.querySelector(`[data-tab="${urlParams.get('tab')}"]`);
+  if (t) t.click();
+}
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+function toast(msg, type = 'ok', duration = 3500) {
+  const c = document.getElementById('toastContainer');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), duration);
+}
+
+/* ════════════════════════════════════════════════
+   OFFLINE DETECTION
+════════════════════════════════════════════════ */
+function updateOnlineStatus() {
+  document.getElementById('offlineBanner').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+/* ════════════════════════════════════════════════
+   POMODORO
+════════════════════════════════════════════════ */
+function pomUpdate() {
+  const m = Math.floor(STATE.pomSeconds / 60).toString().padStart(2, '0');
+  const s = (STATE.pomSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('pomDisplay').textContent = `${m}:${s}`;
+}
+
+function pomToggle() {
+  if (STATE.pomRunning) {
+    clearInterval(STATE.pomInterval);
+    STATE.pomRunning = false;
+    document.getElementById('pomBtn').textContent = '▶ Iniciar';
+  } else {
+    STATE.pomRunning = true;
+    document.getElementById('pomBtn').textContent = '⏸ Pausar';
+    STATE.pomInterval = setInterval(() => {
+      STATE.pomSeconds--;
+      pomUpdate();
+      if (STATE.pomSeconds <= 0) {
+        clearInterval(STATE.pomInterval);
+        STATE.pomRunning = false;
+        document.getElementById('pomBtn').textContent = '▶ Iniciar';
+        STATE.pomDone++;
+        saveTodayStats();
+        toast('🍅 ¡Pomodoro completado! Tómate un descanso.', 'ok', 5000);
+        if ('Notification' in window && Notification.permission === 'granted') {
+          new Notification('🍅 Pomodoro completado', { body: 'Tómate un descanso.', icon: 'icon.png' });
+        }
+      }
+    }, 1000);
+  }
+}
+
+function pomReset() {
+  clearInterval(STATE.pomInterval);
+  STATE.pomRunning = false;
+  document.getElementById('pomBtn').textContent = '▶ Iniciar';
+  const mins = parseInt(document.getElementById('pomMode').value);
+  STATE.pomSeconds = mins * 60;
+  pomUpdate();
+}
+
+// Pedir permiso notificaciones
+if ('Notification' in window && Notification.permission === 'default') {
+  Notification.requestPermission();
+}
+
+/* ════════════════════════════════════════════════
+   GENERADOR IA
+════════════════════════════════════════════════ */
+function setPrompt(txt) {
+  document.getElementById('promptInput').value = txt;
+}
+
+async function generateCode() {
+  const prompt = document.getElementById('promptInput').value.trim();
+  if (!prompt) { toast('⚠️ Escribe un prompt primero.', 'warn'); return; }
+
+  const model = document.getElementById('modelSelect').value;
+  const output = document.getElementById('codeOutput');
+  output.textContent = '⏳ Generando...';
+
+  const isGemini = model.startsWith('gemini');
+  const key = isGemini ? STATE.geminiKey : STATE.groqKey;
+
+  if (!key) {
+    output.textContent = '❌ Configura tu API key en ⚙️ Config primero.';
+    toast('❌ Sin API key', 'err');
+    return;
+  }
+
+  const systemMsg = `Eres un experto en desarrollo de software. Genera código limpio, comentado y funcional.${STATE.aiContext ? '\n\nContexto adicional:\n' + STATE.aiContext : ''}`;
+
+  try {
+    let result = '';
+
+    if (isGemini) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: systemMsg + '\n\n' + prompt }] }]
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      result = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sin resultado';
+    } else {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: 'system', content: systemMsg },
+            { role: 'user', content: prompt }
+          ],
+          max_tokens: 4096,
+          temperature: 0.3
+        })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      result = data.choices?.[0]?.message?.content || 'Sin resultado';
+    }
+
+    output.textContent = result;
+    STATE.lastModel = model;
+    incrementToday();
+    toast('✅ Código generado', 'ok');
+
+  } catch (err) {
+    output.textContent = `❌ Error: ${err.message}`;
+    toast(`❌ ${err.message}`, 'err');
+  }
+}
+
+async function fetchURL() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) { toast('⚠️ Introduce una URL.', 'warn'); return; }
+  const output = document.getElementById('codeOutput');
+  output.textContent = '⏳ Obteniendo datos...';
+  try {
+    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    output.textContent = data.contents?.substring(0, 5000) || 'Sin contenido';
+    toast('✅ Datos obtenidos', 'ok');
+  } catch (e) {
+    output.textContent = `❌ Error: ${e.message}`;
+    toast('❌ Error al obtener URL', 'err');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   SNIPPETS
+════════════════════════════════════════════════ */
+function saveSnippet() {
+  const code = document.getElementById('codeOutput').textContent;
+  const prompt = document.getElementById('promptInput').value;
+  if (!code || code.startsWith('//')) { toast('⚠️ Nada que guardar.', 'warn'); return; }
+
+  const snippet = {
+    id: Date.now(),
+    prompt: prompt.substring(0, 80),
+    code,
+    model: STATE.lastModel,
+    size: new Blob([code]).size,
+    date: new Date().toLocaleDateString('es-ES')
+  };
+
+  STATE.snippets.unshift(snippet);
+  localStorage.setItem('cai_snippets', JSON.stringify(STATE.snippets));
+  toast('💾 Snippet guardado', 'ok');
+  renderHistory();
+}
+
+function renderHistory() {
+  const tbody = document.getElementById('historyBody');
+  const search = document.getElementById('searchSnippets')?.value.toLowerCase() || '';
+  const filtered = STATE.snippets.filter(s =>
+    s.prompt.toLowerCase().includes(search) || s.model?.toLowerCase().includes(search)
+  );
+
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">Sin snippets.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(s => `
+    <tr>
+      <td title="${s.prompt}">${s.prompt.substring(0,50)}${s.prompt.length>50?'…':''}</td>
+      <td><span class="badge badge-ok">${s.model || '—'}</span></td>
+      <td>${(s.size/1024).toFixed(1)} KB</td>
+      <td>${s.date}</td>
+      <td>
+        <button class="btn" style="padding:4px 8px;font-size:.75rem" onclick="loadSnippet(${s.id})">📋 Cargar</button>
+        <button class="btn btn-danger" style="padding:4px 8px;font-size:.75rem" onclick="deleteSnippet(${s.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function loadSnippet(id) {
+  const s = STATE.snippets.find(x => x.id === id);
+  if (s) {
+    document.getElementById('codeOutput').textContent = s.code;
+    document.getElementById('promptInput').value = s.prompt;
+    document.querySelector('[data-tab="generator"]').click();
+    toast('📋 Snippet cargado', 'ok');
+  }
+}
+
+function deleteSnippet(id) {
+  STATE.snippets = STATE.snippets.filter(x => x.id !== id);
+  localStorage.setItem('cai_snippets', JSON.stringify(STATE.snippets));
+  renderHistory();
+  toast('🗑️ Snippet eliminado', 'warn');
+}
+
+function clearAllSnippets() {
+  if (!confirm('¿Eliminar todos los snippets?')) return;
+  STATE.snippets = [];
+  localStorage.setItem('cai_snippets', JSON.stringify([]));
+  renderHistory();
+  toast('🗑️ Historial limpiado', 'warn');
+}
+
+function exportSnippets() {
+  const blob = new Blob([JSON.stringify(STATE.snippets, null, 2)], { type: 'application/json' });
+  downloadBlob(blob, 'codeai-snippets.json');
+  toast('⬇️ Snippets exportados', 'ok');
+}
+
+function importSnippets() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        STATE.snippets = [...data, ...STATE.snippets];
+        localStorage.setItem('cai_snippets', JSON.stringify(STATE.snippets));
+        renderHistory();
+        toast(`✅ ${data.length} snippets importados`, 'ok');
+      } catch { toast('❌ Archivo inválido', 'err'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* ════════════════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════════════════ */
+function renderDashboard() {
+  const totalSize = STATE.snippets.reduce((a, s) => a + (s.size || 0), 0);
+  document.getElementById('statSnippets').textContent = STATE.snippets.length;
+  document.getElementById('statKB').textContent = (totalSize / 1024).toFixed(1) + ' KB';
+  document.getElementById('statToday').textContent = STATE.generatedToday;
+  document.getElementById('statModel').textContent = STATE.lastModel || '—';
+  document.getElementById('statPom').textContent = STATE.pomDone;
+  renderHistory();
+}
+
+function incrementToday() {
+  const today = new Date().toDateString();
+  if (STATE.todayDate !== today) { STATE.generatedToday = 0; STATE.todayDate = today; }
+  STATE.generatedToday++;
+  localStorage.setItem('cai_today', STATE.generatedToday);
+  localStorage.setItem('cai_today_date', STATE.todayDate);
+}
+
+function saveTodayStats() {
+  localStorage.setItem('cai_pom', STATE.pomDone);
+}
+
+/* ════════════════════════════════════════════════
+   SANDBOX
+════════════════════════════════════════════════ */
+function runSandbox() {
+  const code = document.getElementById('sandboxEditor').value;
+  const iframe = document.getElementById('preview');
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(code); doc.close();
+  toast('▶ Ejecutado', 'ok');
+}
+
+function copySandbox() {
+  navigator.clipboard.writeText(document.getElementById('sandboxEditor').value)
+    .then(() => toast('📋 Copiado', 'ok'));
+}
+
+function saveSandboxSnippet() {
+  const code = document.getElementById('sandboxEditor').value;
+  if (!code.trim()) { toast('⚠️ Sandbox vacío', 'warn'); return; }
+  const snippet = {
+    id: Date.now(), prompt: 'Sandbox', code, model: 'manual',
+    size: new Blob([code]).size, date: new Date().toLocaleDateString('es-ES')
+  };
+  STATE.snippets.unshift(snippet);
+  localStorage.setItem('cai_snippets', JSON.stringify(STATE.snippets));
+  toast('💾 Guardado desde Sandbox', 'ok');
+}
+
+function clearSandbox() {
+  document.getElementById('sandboxEditor').value = '';
+  const iframe = document.getElementById('preview');
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open(); doc.write(''); doc.close();
+}
+
+function loadFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { document.getElementById('sandboxEditor').value = e.target.result; };
+  reader.readAsText(file);
+}
+
+function sendToSandbox() {
+  const code = document.getElementById('codeOutput').textContent;
+  document.getElementById('sandboxEditor').value = code;
+  document.querySelector('[data-tab="sandbox"]').click();
+  toast('🧪 Enviado a Sandbox', 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════ */
+function saveKeys() {
+  STATE.groqKey = document.getElementById('groqKey').value.trim();
+  STATE.geminiKey = document.getElementById('geminiKey').value.trim();
+  localStorage.setItem('cai_groq', STATE.groqKey);
+  localStorage.setItem('cai_gemini', STATE.geminiKey);
+  toast('💾 Claves guardadas', 'ok');
+}
+
+async function testAPIKeys() {
+  toast('🔍 Verificando...', 'warn');
+  if (STATE.groqKey) {
+    try {
+      const r = await fetch('https://api.groq.com/openai/v1/models', {
+        headers: { 'Authorization': `Bearer ${STATE.groqKey}` }
+      });
+      if (r.ok) toast('✅ Groq: clave válida', 'ok');
+      else toast('❌ Groq: clave inválida', 'err');
+    } catch { toast('❌ Groq: error de conexión', 'err'); }
+  }
+}
+
+function toggleTheme() {
+  const dark = document.getElementById('darkToggle').checked;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  localStorage.setItem('cai_theme', dark ? 'dark' : 'light');
+}
+
+function applyThemeColor() {
+  const color = document.getElementById('themeColor').value;
+  document.documentElement.style.setProperty('--accent', color);
+  localStorage.setItem('cai_accent', color);
+}
+
+function setLang(lang) {
+  STATE.lang = lang;
+  localStorage.setItem('cai_lang', lang);
+  document.querySelectorAll('.lang-btns button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll(`.lang-btns button`).forEach(b => {
+    if (b.textContent.includes(lang.toUpperCase())) b.classList.add('active');
+  });
+  toast(`🌐 Idioma: ${lang.toUpperCase()}`, 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   URLS IA
+════════════════════════════════════════════════ */
+function addURL() {
+  const url = document.getElementById('newURL').value.trim();
+  if (!url) return;
+  STATE.urls.push(url);
+  localStorage.setItem('cai_urls', JSON.stringify(STATE.urls));
+  document.getElementById('newURL').value = '';
+  renderURLs();
+  toast('🔗 URL añadida', 'ok');
+}
+
+function renderURLs() {
+  const list = document.getElementById('urlList');
+  list.innerHTML = STATE.urls.map((u, i) => `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <span style="flex:1;font-size:.8rem;color:var(--text2);overflow:hidden;text-overflow:ellipsis">${u}</span>
+      <button class="btn btn-danger" style="padding:3px 8px;font-size:.75rem" onclick="removeURL(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeURL(i) {
+  STATE.urls.splice(i, 1);
+  localStorage.setItem('cai_urls', JSON.stringify(STATE.urls));
+  renderURLs();
+}
+
+async function loadURLsIntoAI() {
+  if (!STATE.urls.length) { toast('⚠️ Sin URLs añadidas', 'warn'); return; }
+  toast('⏳ Cargando URLs...', 'warn');
+  let context = '';
+  for (const url of STATE.urls) {
+    try {
+      const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+      const d = await r.json();
+      context += `\n\n[${url}]:\n${d.contents?.substring(0, 1000) || ''}`;
+    } catch {}
+  }
+  STATE.aiContext = context;
+  toast(`✅ ${STATE.urls.length} URLs cargadas en contexto IA`, 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   GOOGLE DRIVE
+════════════════════════════════════════════════ */
+function saveDriveConfig() {
+  localStorage.setItem('cai_drive_id', document.getElementById('driveClientId').value);
+  localStorage.setItem('cai_drive_token', document.getElementById('driveToken').value);
+  toast('💾 Config Drive guardada', 'ok');
+}
+
+async function testDrive() {
+  const token = document.getElementById('driveToken').value || localStorage.getItem('cai_drive_token');
+  if (!token) { toast('⚠️ Sin token Drive', 'warn'); return; }
+  try {
+    const r = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const d = await r.json();
+    if (d.user) {
+      document.getElementById('driveStatus').textContent = `✅ Conectado: ${d.user.displayName}`;
+      toast('✅ Drive conectado', 'ok');
+    } else throw new Error('Token inválido');
+  } catch (e) {
+    document.getElementById('driveStatus').textContent = '❌ Error de conexión';
+    toast('❌ Drive: ' + e.message, 'err');
+  }
+}
+
+async function syncDrive() {
+  const token = localStorage.getItem('cai_drive_token');
+  if (!token) { toast('⚠️ Configura Drive primero', 'warn'); return; }
+  const data = JSON.stringify(STATE.snippets);
+  const metadata = { name: 'codeai-snippets.json', mimeType: 'application/json' };
+  const form = new FormData();
+  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+  form.append('file', new Blob([data], { type: 'application/json' }));
+  try {
+    const r = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: form
+    });
+    if (r.ok) toast('✅ Sincronizado con Drive', 'ok');
+    else throw new Error('Error al subir');
+  } catch (e) { toast('❌ Sync Drive: ' + e.message, 'err'); }
+}
+
+/* ════════════════════════════════════════════════
+   EXPORTAR / IMPORTAR PERFIL
+════════════════════════════════════════════════ */
+function exportProfile() {
+  const profile = {
+    snippets: STATE.snippets,
+    urls: STATE.urls,
+    lang: STATE.lang,
+    accentColor: STATE.accentColor,
+    exportDate: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(profile, null, 2)], { type: 'application/json' });
+  downloadBlob(blob, 'codeai-profile.json');
+  toast('⬇️ Perfil exportado', 'ok');
+}
+
+function importProfile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const p = JSON.parse(e.target.result);
+      if (p.snippets) { STATE.snippets = p.snippets; localStorage.setItem('cai_snippets', JSON.stringify(p.snippets)); }
+      if (p.urls) { STATE.urls = p.urls; localStorage.setItem('cai_urls', JSON.stringify(p.urls)); renderURLs(); }
+      toast('✅ Perfil importado', 'ok');
+    } catch { toast('❌ Perfil inválido', 'err'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════════════
+   PREMIUM
+════════════════════════════════════════════════ */
+async function activatePremium() {
+  const pass = document.getElementById('premiumPass').value;
+  if (!pass) { toast('⚠️ Introduce la contraseña', 'warn'); return; }
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pass);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // Hash de 'codeaihub2024' como ejemplo
+  const PREMIUM_HASH = 'a3f5e8c2d1b4a7f0e3c6d9b2a5f8e1c4d7b0a3f6e9c2d5b8a1f4e7c0d3b6a9f2';
+  if (hashHex === PREMIUM_HASH) {
+    localStorage.setItem('cai_premium', '1');
+    document.getElementById('premiumStatus').textContent = '✅ Premium activo';
+    toast('✅ Premium activado', 'ok');
+  } else {
+    toast('❌ Contraseña incorrecta', 'err');
+  }
+}
+
+function importPremiumKey(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const key = JSON.parse(e.target.result);
+      if (key.premium === true) {
+        localStorage.setItem('cai_premium', '1');
+        document.getElementById('premiumStatus').textContent = '✅ Premium activo';
+        toast('✅ Premium activado por clave JSON', 'ok');
+      } else toast('❌ Clave inválida', 'err');
+    } catch { toast('❌ Archivo inválido', 'err'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ════════════════════════════════════════════════
+   ENTRENAMIENTO IA
+════════════════════════════════════════════════ */
+function trainWithSnippets() {
+  if (!STATE.snippets.length) { toast('⚠️ Sin snippets para entrenar', 'warn'); return; }
+  STATE.aiContext = STATE.snippets.map(s => `[${s.prompt}]:\n${s.code.substring(0, 500)}`).join('\n\n');
+  document.getElementById('trainStatus').textContent = `✅ ${STATE.snippets.length} snippets cargados en contexto`;
+  document.getElementById('trainStatus').className = 'badge badge-ok';
+  toast('🧠 IA entrenada con snippets', 'ok');
+}
+
+function showTrainAPIModal() {
+  toast('ℹ️ Configura la URL del servidor en ⚙️ Config → URLs IA', 'warn');
+}
+
+/* ════════════════════════════════════════════════
+   DOCS COLLAPSIBLE
+════════════════════════════════════════════════ */
+function toggleCollapse(el) {
+  el.classList.toggle('open');
+  const content = el.nextElementSibling;
+  content.classList.toggle('open');
+}
+
+function expandAll() {
+  document.querySelectorAll('.collapsible').forEach(el => {
+    el.classList.add('open');
+    el.nextElementSibling.classList.add('open');
+  });
+}
+
+function collapseAll() {
+  document.querySelectorAll('.collapsible').forEach(el => {
+    el.classList.remove('open');
+    el.nextElementSibling.classList.remove('open');
+  });
+}
+
+/* ════════════════════════════════════════════════
+   COPIAR / EXPORTAR RESULTADO
+════════════════════════════════════════════════ */
+function copyCode() {
+  const code = document.getElementById('codeOutput').textContent;
+  navigator.clipboard.writeText(code).then(() => toast('📋 Copiado', 'ok'));
+}
+
+function exportResult() {
+  const code = document.getElementById('codeOutput').textContent;
+  const blob = new Blob([code], { type: 'text/plain' });
+  downloadBlob(blob, 'codeai-result.txt');
+  toast('⬇️ Exportado', 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   HELPER: DOWNLOAD BLOB
+════════════════════════════════════════════════ */
+function downloadBlob(blob, filename) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ════════════════════════════════════════════════
+   ── FUNCIÓN 1: GENERADOR QR ──────────────────
+════════════════════════════════════════════════ */
+function generateQR() {
+  const text = document.getElementById('qrInput').value.trim();
+  if (!text) { toast('⚠️ Introduce texto o URL', 'warn'); return; }
+  const encoded = encodeURIComponent(text);
+  const url = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`;
+  document.getElementById('qrOutput').innerHTML = `<img id="qrImg" src="${url}" alt="QR Code" />`;
+  toast('📱 QR generado', 'ok');
+}
+
+function downloadQR() {
+  const img = document.getElementById('qrImg');
+  if (!img) { toast('⚠️ Genera un QR primero', 'warn'); return; }
+  const a = document.createElement('a');
+  a.href = img.src; a.download = 'qrcode.png'; a.target = '_blank';
+  a.click();
+  toast('⬇️ QR descargado', 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   ── FUNCIÓN 2: CONVERSOR DE CÓDIGO ──────────
+════════════════════════════════════════════════ */
+async function convertCode() {
+  const code = document.getElementById('convertInput').value.trim();
+  const from = document.getElementById('convertFrom').value;
+  const to = document.getElementById('convertTo').value;
+  if (!code) { toast('⚠️ Pega el código a convertir', 'warn'); return; }
+
+  const output = document.getElementById('convertOutput');
+  output.textContent = '⏳ Convirtiendo...';
+
+  const prompt = `Convierte este código de ${from} a ${to}. Devuelve SOLO el código convertido sin explicaciones:\n\n${code}`;
+
+  try {
+    const result = await callAI(prompt);
+    output.textContent = result;
+    toast(`✅ Convertido a ${to}`, 'ok');
+  } catch (e) {
+    output.textContent = `❌ ${e.message}`;
+    toast('❌ Error en conversión', 'err');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ── FUNCIÓN 3: REVISOR DE CÓDIGO ────────────
+════════════════════════════════════════════════ */
+async function reviewCode() {
+  const code = document.getElementById('reviewInput').value.trim();
+  if (!code) { toast('⚠️ Pega el código a revisar', 'warn'); return; }
+
+  const output = document.getElementById('reviewOutput');
+  output.textContent = '⏳ Analizando...';
+
+  const prompt = `Analiza este código y proporciona:
+1. 🐛 Bugs encontrados
+2. ⚡ Mejoras de rendimiento
+3. 🔒 Problemas de seguridad
+4. ✅ Buenas prácticas faltantes
+5. 📊 Puntuación de calidad (0-10)
+
+Código:\n\n${code}`;
+
+  try {
+    const result = await callAI(prompt);
+    output.textContent = result;
+    toast('✅ Análisis completado', 'ok');
+  } catch (e) {
+    output.textContent = `❌ ${e.message}`;
+    toast('❌ Error en análisis', 'err');
+  }
+}
+
+async function fixCode() {
+  const code = document.getElementById('reviewInput').value.trim();
+  if (!code) { toast('⚠️ Pega el código a corregir', 'warn'); return; }
+
+  const output = document.getElementById('reviewOutput');
+  output.textContent = '⏳ Corrigiendo...';
+
+  const prompt = `Corrige todos los bugs y mejora este código. Devuelve SOLO el código corregido:\n\n${code}`;
+
+  try {
+    const result = await callAI(prompt);
+    output.textContent = result;
+    toast('🔧 Código corregido', 'ok');
+  } catch (e) {
+    output.textContent = `❌ ${e.message}`;
+    toast('❌ Error', 'err');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   ── FUNCIÓN 4: GENERADOR README ─────────────
+════════════════════════════════════════════════ */
+async function generateREADME() {
+  const name = document.getElementById('readmeName').value.trim();
+  const desc = document.getElementById('readmeDesc').value.trim();
+  const tech = document.getElementById('readmeTech').value.trim();
+
+  if (!name) { toast('⚠️ Introduce el nombre del proyecto', 'warn'); return; }
+
+  const output = document.getElementById('readmeOutput');
+  output.textContent = '⏳ Generando README...';
+
+  const prompt = `Genera un README.md profesional y completo en español para:
+- Nombre: ${name}
+- Descripción: ${desc}
+- Tecnologías: ${tech}
+
+Incluye: badges, descripción, características, instalación, uso, capturas (placeholder), contribuir, licencia MIT.`;
+
+  try {
+    const result = await callAI(prompt);
+    output.textContent = result;
+    toast('📝 README generado', 'ok');
+  } catch (e) {
+    output.textContent = `❌ ${e.message}`;
+    toast('❌ Error', 'err');
+  }
+}
+
+function copyREADME() {
+  navigator.clipboard.writeText(document.getElementById('readmeOutput').textContent)
+    .then(() => toast('📋 README copiado', 'ok'));
+}
+
+function downloadREADME() {
+  const content = document.getElementById('readmeOutput').textContent;
+  const blob = new Blob([content], { type: 'text/markdown' });
+  downloadBlob(blob, 'README.md');
+  toast('⬇️ README descargado', 'ok');
+}
+
+/* ════════════════════════════════════════════════
+   ── FUNCIÓN 5: DIFF VIEWER ──────────────────
+════════════════════════════════════════════════ */
+function runDiff() {
+  const a = document.getElementById('diffA').value.split('\n');
+  const b = document.getElementById('diffB').value.split('\n');
+  const output = document.getElementById('diffOutput');
+
+  if (!a.join('').trim() && !b.join('').trim()) {
+    toast('⚠️ Introduce código en ambos campos', 'warn'); return;
+  }
+
+  const maxLen = Math.max(a.length, b.length);
+  let html = '';
+  let adds = 0, dels = 0;
+
+  for (let i = 0; i < maxLen; i++) {
+    const lineA = a[i] !== undefined ? a[i] : null;
+    const lineB = b[i] !== undefined ? b[i] : null;
+
+    if (lineA === lineB) {
+      html += `<div class="diff-line" style="color:var(--text2)"><span style="color:var(--border);margin-right:8px">${i+1}</span>${escHtml(lineA || '')}</div>`;
+    } else if (lineA !== null && lineB === null) {
+      html += `<div class="diff-line diff-del">- ${escHtml(lineA)}</div>`;
+      dels++;
+    } else if (lineA === null && lineB !== null) {
+      html += `<div class="diff-line diff-add">+ ${escHtml(lineB)}</div>`;
+      adds++;
+    } else {
+      html += `<div class="diff-line diff-del">- ${escHtml(lineA)}</div>`;
+      html += `<div class="diff-line diff-add">+ ${escHtml(lineB)}</div>`;
+      dels++; adds++;
+    }
+  }
+
+  output.innerHTML = `
+    <div style="padding:8px 12px;background:var(--bg3);font-size:.8rem;color:var(--text2)">
+      <span style="color:var(--success)">+${adds} líneas añadidas</span> &nbsp;
+      <span style="color:var(--danger)">-${dels} líneas eliminadas</span>
+    </div>
+    <div style="max-height:400px;overflow-y:auto">${html}</div>
+  `;
+  toast(`🆚 Diff: +${adds} / -${dels}`, 'ok');
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ════════════════════════════════════════════════
+   HELPER: CALL AI (reutilizable)
+════════════════════════════════════════════════ */
+async function callAI(prompt) {
+  const model = document.getElementById('modelSelect').value;
+  const isGemini = model.startsWith('gemini');
+  const key = isGemini ? STATE.geminiKey : STATE.groqKey;
+
+  if (!key) throw new Error('Configura tu API key en ⚙️ Config');
+
+  if (isGemini) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sin resultado';
+  } else {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model, messages: [{ role: 'user', content: prompt }],
+        max_tokens: 4096, temperature: 0.3
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    return data.choices?.[0]?.message?.content || 'Sin resultado';
+  }
+}
+
+/* ════════════════════════════════════════════════
+   INICIALIZACIÓN
+════════════════════════════════════════════════ */
+(function init() {
+  // Cargar claves guardadas
+  document.getElementById('groqKey').value = STATE.groqKey;
+  document.getElementById('geminiKey').value = STATE.geminiKey;
+  document.getElementById('driveClientId').value = localStorage.getItem('cai_drive_id') || '';
+  document.getElementById('driveToken').value = localStorage.getItem('cai_drive_token') || '';
+
+  // Tema
+  if (STATE.theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    document.getElementById('darkToggle').checked = false;
+  }
+
+  // Color acento
+  if (STATE.accentColor !== '#00c8ff') {
+    document.documentElement.style.setProperty('--accent', STATE.accentColor);
+  }
+
+  // URLs
+  renderURLs();
+
+  // Premium
+  if (localStorage.getItem('cai_premium') === '1') {
+    document.getElementById('premiumStatus').textContent = '✅ Premium activo — funciones desbloqueadas';
+  }
+
+  // Pomodoro
+  pomUpdate();
+
+  // Pomodoros guardados
+  STATE.pomDone = parseInt(localStorage.getItem('cai_pom') || '0');
+
+  console.log('✅ CodeAI Hub v20 iniciado');
+})();
+</script>
+
+</body>
+</html>
